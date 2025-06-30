@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профессиональный калькулятор сдобного теста</title>
+    <style>
+        :root {
+            --primary: #5d4037;
+            --secondary: #ff9800;
+            --accent: #f57c00;
+            --light: #fff8f0;
+            --dark: #4e342e;
+            --success: #4caf50;
+            --warning: #ffc107;
+            --danger: #f44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            padding: 30px;
+        }
+        
+        header {
+            text-align: center;
+            padding-bottom: 25px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            border-radius: 2px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: var(--dark);
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+        }
+        
+        .error {
+            border-color: var(--danger) !important;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
+        .error-message {
+            color: var(--danger);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .results-container {
+            display: none;
+            margin-top: 30px;
+            background: var(--light);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+            font-size: 1.5rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .results-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--accent);
+        }
+        
+        .ingredient-group {
+            margin-bottom: 25px;
+        }
+        
+        .group-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 1.2rem;
+        }
+        
+        .ingredient-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .ingredient-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .ingredient-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 152, 0, 0.1);
+            border-radius: 50%;
+            font-size: 1.2rem;
+        }
+        
+        .ingredient-info {
+            flex: 1;
+        }
+        
+        .ingredient-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .ingredient-value {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        .ingredient-note {
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 5px;
+            line-height: 1.3;
+        }
+        
+        .notes {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .notes-title {
+            color: var(--dark);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .note-list {
+            padding-left: 20px;
+        }
+        
+        .note-list li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .ingredient-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Профессиональный калькулятор сдобного теста</h1>
+            <p class="subtitle">Идеальные пропорции для максимальной пышности</p>
+        </header>
+        
+        <div class="input-group">
+            <label for="flour">Количество муки (г):</label>
+            <input type="number" id="flour" placeholder="Введите количество муки..." value="500" oninput="calculateIngredients()">
+            <div class="error-message" id="error">Пожалуйста, введите корректное количество муки!</div>
+        </div>
+        
+        <div class="results-container" id="resultsContainer">
+            <h2 class="results-header">Ингредиенты для идеального теста</h2>
+            
+            <div class="ingredient-group">
+                <div class="group-title">
+                    <span>⚖️ Основные ингредиенты</span>
+                </div>
+                <div class="ingredient-list" id="mainIngredients"></div>
+            </div>
+            
+            <div class="ingredient-group">
+                <div class="group-title">
+                    <span>🧫 Закваска</span>
+                </div>
+                <div class="ingredient-list" id="leavenIngredients"></div>
+            </div>
+            
+            <div class="ingredient-group">
+                <div class="group-title">
+                    <span>🍯 Добавки</span>
+                </div>
+                <div class="ingredient-list" id="additiveIngredients"></div>
+            </div>
+            
+            <div class="ingredient-group">
+                <div class="group-title">
+                    <span>🥚 Яичные компоненты</span>
+                </div>
+                <div class="ingredient-list" id="eggIngredients"></div>
+            </div>
+            
+            <div class="notes">
+                <div class="notes-title">
+                    <span>📝 Критические рекомендации</span>
+                </div>
+                <ul class="note-list" id="notesList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Оптимальные пропорции для пышного теста (на 500 г муки)
+        const BASE_FLOUR = 500;
+        const BASE_MILK = 200;
+        const BASE_BUTTER = 90;
+        const BASE_SUGAR = 100;
+        const BASE_SALT = 5;
+        const BASE_DRY_YEAST = 8;
+        const BASE_YOLKS = 2; // идеальное число желтков
+        const BASE_WHITES = 1; // идеальное число белков
+        const BASE_VANILLA = 10;
+        
+        function calculateIngredients() {
+            const flourInput = document.getElementById('flour');
+            const errorMessage = document.getElementById('error');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const flour = parseFloat(flourInput.value);
+            
+            // Валидация ввода
+            if (isNaN(flour) || flour <= 0) {
+                flourInput.classList.add('error');
+                errorMessage.style.display = 'block';
+                resultsContainer.style.display = 'none';
+                return;
+            }
+            
+            flourInput.classList.remove('error');
+            errorMessage.style.display = 'none';
+            
+            const ratio = flour / BASE_FLOUR;
+            
+            const milk = BASE_MILK * ratio;
+            const butter = BASE_BUTTER * ratio;
+            const sugar = BASE_SUGAR * ratio;
+            const salt = BASE_SALT * ratio;
+            const dryYeast = BASE_DRY_YEAST * ratio;
+            const freshYeast = dryYeast * 3;
+            const vanilla = BASE_VANILLA * ratio;
+            
+            // --- НОВАЯ ЛОГИКА ДЛЯ ЯИЦ ---
+            const idealYolks = BASE_YOLKS * ratio;
+            const idealWhites = BASE_WHITES * ratio;
+            
+            const roundedYolks = Math.round(idealYolks);
+            const roundedWhites = Math.round(idealWhites);
+            
+            let eggNote = '';
+            if (roundedYolks > 0 || roundedWhites > 0) {
+                 const totalEggsNeeded = Math.max(roundedYolks, roundedWhites);
+                 if (totalEggsNeeded > 0) {
+                    if (roundedYolks > roundedWhites) {
+                        const wholeEggs = roundedWhites;
+                        const extraYolks = roundedYolks - roundedWhites;
+                        eggNote = `Возьмите ${wholeEggs > 0 ? wholeEggs : ''} ${wholeEggs === 1 ? 'целое яйцо' : (wholeEggs > 1 ? 'целых яйца' : '')} и добавьте еще ${extraYolks} ${extraYolks === 1 ? 'желток' : 'желтка'}.`
+                        if (wholeEggs === 0) eggNote = `Понадобится только ${extraYolks} ${extraYolks === 1 ? 'желток' : 'желтка'}.`;
+
+                    } else if (roundedWhites > roundedYolks) {
+                         const wholeEggs = roundedYolks;
+                         const extraWhites = roundedWhites - roundedYolks;
+                         eggNote = `Возьмите ${wholeEggs > 0 ? wholeEggs : ''} ${wholeEggs === 1 ? 'целое яйцо' : 'целых яйца'} и добавьте еще ${extraWhites} ${extraWhites === 1 ? 'белок' : 'белка'}.`
+                         if (wholeEggs === 0) eggNote = `Понадобится только ${extraWhites} ${extraWhites === 1 ? 'белок' : 'белка'}.`;
+                    } else { // yolks == whites
+                        eggNote = `Понадобится ${roundedYolks} ${roundedYolks === 1 ? 'целое яйцо' : 'целых яйца'}.`;
+                    }
+                 }
+            } else {
+                 eggNote = "При таком малом количестве муки яйца не требуются.";
+            }
+             // Коррекция для единственного числа
+             eggNote = eggNote.replace("1 целых яйца", "1 целое яйцо");
+             eggNote = eggNote.replace("1 желтка", "1 желток");
+             eggNote = eggNote.replace("1 белка", "1 белок");
+
+            
+            const formatValue = (value, unit = 'г') => {
+                if (value < 10 && !Number.isInteger(value)) return value.toFixed(1) + unit;
+                return Math.round(value) + unit;
+            };
+
+            document.getElementById('mainIngredients').innerHTML = `
+                <div class="ingredient-card">
+                    <div class="ingredient-icon">🍞</div>
+                    <div class="ingredient-info">
+                        <div class="ingredient-name">Мука</div>
+                        <div class="ingredient-value">${formatValue(flour)}</div>
+                    </div>
+                </div>
+                <div class="ingredient-card">
+                    <div class="ingredient-icon">🥛</div>
+                    <div class="ingredient-info">
+                        <div class="ingredient-name">Молоко (38°C)</div>
+                        <div class="ingredient-value">${formatValue(milk, ' мл')}</div>
+                    </div>
+                </div>
+                <div class="ingredient-card">
+                    <div class="ingredient-icon">🧈</div>
+                    <div class="ingredient-info">
+                        <div class="ingredient-name">Сливочное масло</div>
+                        <div class="ingredient-value">${formatValue(butter)}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('leavenIngredients').innerHTML = `
+                <div class="ingredient-card">
+                    <div class="ingredient-icon">🧂</div>
+                    <div class="ingredient-info">
+                        <div class="ingredient-name">Соль</div>
+                        <div class="ingredient-value">${formatValue(salt)} <span style="font-weight: 500; font-size: 0.9rem">≈ ${(salt/5).toFixed(1)} ч.л.</span></div>
+                    </div>
+                </div>
+                <div class="ingredient-card">
+                    <div class="ingredient-icon">🫧</div>
+                    <div class="ingredient-info">
+                        <div class="ingredient-name">Дрожжи</div>
+                        <div class="ingredient-value" style="font-size: 1rem; line-height: 1.4;">
+                            Сухие: ${formatValue(dryYeast)}<br>
+                            Свежие: ${formatValue(freshYeast)}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('additiveIngredients').innerHTML = `
+                <div class="ingredient-card">
+                    <div class="ingredient-icon">🍬</div>
+                    <div class="ingredient-info">
+                        <div class="ingredient-name">Сахар</div>
+                        <div class="ingredient-value">${formatValue(sugar)}</div>
+                    </div>
+                </div>
+                <div class="ingredient-card">
+                    <div class="ingredient-icon">🌿</div>
+                    <div class="ingredient-info">
+                        <div class="ingredient-name">Ванильный сахар</div>
+                        <div class="ingredient-value">${formatValue(vanilla)}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('eggIngredients').innerHTML = `
+                <div class="ingredient-card" style="grid-column: 1 / -1;">
+                    <div class="ingredient-icon">🥚</div>
+                    <div class="ingredient-info">
+                        <div class="ingredient-name">Яйца (C1, ~50г)</div>
+                        <div class="ingredient-value">Желтки: ${roundedYolks} шт, Белки: ${roundedWhites} шт</div>
+                        <div class="ingredient-note">
+                            <b>Практический совет:</b> ${eggNote}<br>
+                            <small><i>*Рецепт использует больше желтков для максимальной нежности теста.</i></small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('notesList').innerHTML = `
+                <li><b>Активация дрожжей:</b> Растворите дрожжи и 1 ст.л. сахара в теплом молоке (38°C). Оставьте на 10-15 мин до появления "шапочки".</li>
+                <li><b>Подготовка ингредиентов:</b> Масло растопите и остудите. Яйца используйте согласно инструкции выше.</li>
+                <li><b>Замес:</b> Смешайте все ингредиенты. Вымешивайте тесто 10-15 минут до гладкости и эластичности.</li>
+                <li><b>Расстойка:</b> Оставьте в теплом месте (28-30°C) на 1-1.5 часа, пока тесто не увеличится вдвое.</li>
+                <li><b>Выпекание:</b> При 180°C 20-25 минут (для небольших изделий) до золотистого цвета.</li>
+                <li><b>Глазурь (по желанию):</b> Перед выпечкой смажьте изделия смесью желтка и молока (1:1) для глянцевой корочки.</li>
+            `;
+            
+            resultsContainer.style.display = 'block';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateIngredients();
+            const flourInput = document.getElementById('flour');
+            flourInput.focus();
+            flourInput.select();
+        });
+    </script>
+</body>
+</html>
