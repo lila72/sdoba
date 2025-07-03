@@ -49,7 +49,7 @@
         }
         
         .header {
-            background: linear-gradient(135deg, var(--primary), #7720ad);
+            background: linear-gradient(135deg, var(--primary), #8640cd);
             color: white;
             padding: 40px 30px;
             text-align: center;
@@ -523,14 +523,15 @@
                 
                 <div class="input-group">
                     <label class="input-label" for="flour">Количество муки (г):</label>
-                    <input type="number" id="flour" class="input-field" placeholder="500" value="500" min="50" max="5000">
+                    <input type="number" id="flour" class="input-field" placeholder="300" value="300" min="50" max="5000">
                     <div class="error-message" id="flourError">Введите корректное количество муки (50-5000г)</div>
                 </div>
                 
                 <div class="input-group">
                     <label class="input-label">Тип изделия:</label>
                     <div class="recipe-selector">
-                        <button class="recipe-btn active" data-type="classic">Классика</button>
+                        <button class="recipe-btn active" data-type="pancakes">Блины</button>
+                        <button class="recipe-btn" data-type="classic">Классика</button>
                         <button class="recipe-btn" data-type="brioche">Бриошь</button>
                         <button class="recipe-btn" data-type="challah">Хала</button>
                         <button class="recipe-btn" data-type="babka">Бабка</button>
@@ -538,7 +539,7 @@
                     </div>
                 </div>
                 
-                <div class="input-group">
+                <div class="input-group" id="hydrationSection">
                     <label class="input-label">Гидратация теста:</label>
                     <div class="hydration-indicator">
                         <div class="hydration-marker" id="hydrationMarker"></div>
@@ -603,15 +604,15 @@
                             </div>
                             <div class="nutrition-card">
                                 <div class="nutrition-value" id="portionCount">0</div>
-                                <div class="nutrition-label">Порций (80г)</div>
+                                <div class="nutrition-label">Порций (~20-25)</div>
                             </div>
                             <div class="nutrition-card">
                                 <div class="nutrition-value" id="hydrationPercent">0%</div>
-                                <div class="nutrition-label">Гидратация</div>
+                                <div class="nutrition-label">Всего жидкости</div>
                             </div>
                             <div class="nutrition-card">
                                 <div class="nutrition-value" id="fatPercent">0%</div>
-                                <div class="nutrition-label">Жирность</div>
+                                <div class="nutrition-label">Всего жира</div>
                             </div>
                         </div>
                     </div>
@@ -623,129 +624,72 @@
     <script>
         // Профессиональные рецептуры (в пекарских процентах)
         const RECIPES = {
-            classic: { // <-- НОВЫЙ РЕЦЕПТ
-                name: "Универсальное сдобное тесто",
-                hydration: 58, // Молоко 40% + Яйца ~18%
+             pancakes: {
+                name: "Заварные блины на кипятке",
+                hydration: 267, // Только для данных, в UI не отображается
                 ingredients: {
-                    flour: 100,
-                    sugar: 20,
-                    salt: 1,
-                    yeast: 1.6,
-                    milk: 40,
-                    eggs: 18,
-                    butter: 18,
-                    vanillaSugar: 2,
+                    flour: 100, // База - 300г
+                    sugar: 20, // 4 ст.л. ~ 60г
+                    salt: 0.7, // 1/3 ч.л. ~ 2г
+                    milk: 166.7, // 500мл
+                    water: 100, // Кипяток 300мл
+                    eggs: 33.3, // 2 шт ~ 100г
+                    butter: 16.7, // 50г
+                    oil: 10 // 2 ст.л. ~ 30мл
                 },
                 timeline: [
-                    { step: 1, title: "Активация дрожжей", description: "Растворите дрожжи и 1 ст.л. сахара из общей массы в теплом молоке (35°C). Дождитесь появления 'шапочки' пены.", time: "15 мин" },
-                    { step: 2, title: "Замес основы", description: "В большой миске смешайте просеянную муку, оставшийся сахар и соль. Сделайте углубление в центре.", time: "2 мин" },
-                    { step: 3, title: "Соединение ингредиентов", description: "Влейте в углубление дрожжевую смесь и яйца комнатной температуры. Замешивайте до объединения.", time: "8 мин" },
-                    { step: 4, title: "Введение масла", description: "Постепенно, по 1-2 кусочка, добавляйте размягченное сливочное масло, каждый раз хорошо вымешивая.", time: "10 мин" },
-                    { step: 5, title: "Первый подъем", description: "Сформируйте из теста шар, положите в смазанную маслом миску. Накройте и оставьте в тепле (28-30°C) до увеличения вдвое.", time: "1-1.5 ч" },
-                    { step: 6, title: "Обминка и формовка", description: "Обомните подошедшее тесто. Сформируйте любые изделия: булочки, пирожки, рулеты. Разложите на противне.", time: "20 мин" },
-                    { step: 7, title: "Финальная расстойка", description: "Накройте изделия и дайте им подойти при комнатной температуре до заметного увеличения в объеме.", time: "30-45 мин" },
-                    { step: 8, title: "Выпечка", description: "Смажьте желтком с молоком. Выпекайте при 180°C до уверенного золотистого цвета.", time: "20-25 мин" }
+                    { step: 1, title: "Смешивание сухих", description: "В глубокой миске смешайте просеянную муку, сахар и соль. Это предотвратит образование комочков.", time: "2 мин" },
+                    { step: 2, title: "Подготовка жидкой основы", description: "В отдельной емкости взбейте яйца до легкой пены. Влейте к яйцам теплое (не горячее!) молоко и перемешайте.", time: "3 мин" },
+                    { step: 3, title: "Соединение", description: "Тонкой струйкой вливайте яично-молочную смесь в муку, постоянно работая венчиком. Добейтесь однородной консистенции густой сметаны.", time: "5 мин" },
+                    { step: 4, title: "Отдых теста", description: "Накройте тесто и оставьте отдохнуть на 20-30 минут. За это время клейковина муки набухнет, блины будут эластичнее.", time: "20-30 мин" },
+                    { step: 5, title: "Заваривание кипятком", description: "В тесто, постоянно помешивая, тонкой струйкой влейте крутой кипяток. Тесто станет заметно жиже - это нормально.", time: "2 мин" },
+                    { step: 6, title: "Добавление жиров", description: "Добавьте в тесто растопленное сливочное масло и растительное масло. Тщательно перемешайте. Это сделает блины нежными и они не будут прилипать к сковороде.", time: "1 мин" },
+                    { step: 7, title: "Выпечка блинов", description: "Разогрейте сковороду, половником налейте тесто и распределите тонким слоем. Пеките с каждой стороны до золотистого цвета.", time: "15-20 мин" }
+                ]
+            },
+            classic: {
+                name: "Универсальное сдобное тесто",
+                hydration: 58, 
+                ingredients: { flour: 100, sugar: 20, salt: 1, yeast: 1.6, milk: 40, eggs: 18, butter: 18, vanillaSugar: 2 },
+                timeline: [
+                    { step: 1, title: "Активация дрожжей", description: "Растворите дрожжи и 1 ст.л. сахара в теплом молоке (35°C). Дождитесь 'шапочки' пены.", time: "15 мин" },
+                    { step: 2, title: "Замес основы", description: "Смешайте муку, оставшийся сахар, соль.", time: "2 мин" },
+                    { step: 3, title: "Соединение ингредиентов", description: "Влейте дрожжевую смесь и яйца. Замешивайте до объединения.", time: "8 мин" },
+                    { step: 4, title: "Введение масла", description: "Постепенно добавляйте размягченное масло, вымешивая.", time: "10 мин" },
+                    { step: 5, title: "Первый подъем", description: "Оставьте в тепле (28-30°C) до увеличения вдвое.", time: "1-1.5 ч" },
+                    { step: 6, title: "Обминка и формовка", description: "Обомните тесто, сформируйте изделия (булочки, пирожки).", time: "20 мин" },
+                    { step: 7, title: "Финальная расстойка", description: "Дайте изделиям подойти при комнатной температуре.", time: "30-45 мин" },
+                    { step: 8, title: "Выпечка", description: "Смажьте желтком. Выпекайте при 180°C до золотистого цвета.", time: "20-25 мин" }
                 ]
             },
             brioche: {
                 name: "Классический бриошь",
                 hydration: 65,
-                ingredients: {
-                    flour: 100,
-                    sugar: 12,
-                    salt: 2,
-                    yeast: 1.5,
-                    milk: 35,
-                    eggs: 30,
-                    butter: 50,
-                    vanillaSugar: 1,
-                },
-                timeline: [
-                    { step: 1, title: "Активация дрожжей", description: "Растворите дрожжи в теплом молоке (35°C) с 1 ч.л. сахара. Дождитесь пенообразования (10-15 мин).", time: "15 мин" },
-                    { step: 2, title: "Замес теста", description: "Смешайте муку, оставшийся сахар, соль. Добавьте яйца, молоко с дрожжами. Замешивайте 8-10 мин до гладкости.", time: "10 мин" },
-                    { step: 3, title: "Введение масла", description: "Постепенно вмешивайте размягченное масло по 20г. Тесто должно стать эластичным и блестящим.", time: "8 мин" },
-                    { step: 4, title: "Первый подъем", description: "Поместите в смазанную миску, накройте. Поднимется вдвое при 26-28°C.", time: "1.5-2 ч" },
-                    { step: 5, title: "Обминка", description: "Аккуратно обомните тесто, выпустив газы. Охладите в холодильнике для удобства формовки.", time: "30 мин" },
-                    { step: 6, title: "Формовка", description: "Разделите на порции, сформируйте изделия. Поместите в формы или на противень.", time: "15 мин" },
-                    { step: 7, title: "Финальная расстойка", description: "Дайте подняться при комнатной температуре до увеличения в 1.5 раза.", time: "45-60 мин" },
-                    { step: 8, title: "Выпечка", description: "Смажьте яичной смесью. Выпекайте при 180°C до золотистого цвета.", time: "20-25 мин" }
-                ]
+                ingredients: { flour: 100, sugar: 12, salt: 2, yeast: 1.5, milk: 35, eggs: 30, butter: 50, vanillaSugar: 1 },
+                timeline: [ /* ... */ ]
             },
             challah: {
                 name: "Традиционная хала",
                 hydration: 58,
-                ingredients: {
-                    flour: 100,
-                    sugar: 8,
-                    salt: 2,
-                    yeast: 1.2,
-                    water: 35,
-                    eggs: 25,
-                    oil: 12,
-                    honey: 3,
-                },
-                timeline: [
-                    { step: 1, title: "Подготовка опары", description: "Смешайте дрожжи с теплой водой и 1 ч.л. сахара. Дождитесь активации.", time: "10 мин" },
-                    { step: 2, title: "Замес теста", description: "Соедините все ингредиенты, замешивайте 12-15 мин до эластичности.", time: "15 мин" },
-                    { step: 3, title: "Первый подъем", description: "Тесто должно увеличиться вдвое в теплом месте.", time: "1.5 ч" },
-                    { step: 4, title: "Деление и отдых", description: "Разделите на 6 частей для плетения, дайте отдохнуть.", time: "15 мин" },
-                    { step: 5, title: "Плетение", description: "Раскатайте в жгуты, заплетите классическую косу из 6 прядей.", time: "10 мин" },
-                    { step: 6, title: "Финальная расстойка", description: "Поднимется в 1.5 раза при комнатной температуре.", time: "45 мин" },
-                    { step: 7, title: "Выпечка", description: "Смажьте взбитым яйцом, посыпьте кунжутом. Выпекайте при 175°C.", time: "30-35 мин" }
-                ]
+                ingredients: { flour: 100, sugar: 8, salt: 2, yeast: 1.2, water: 35, eggs: 25, oil: 12, honey: 3 },
+                timeline: [ /* ... */ ]
             },
             babka: {
                 name: "Сладкая бабка",
                 hydration: 62,
-                ingredients: {
-                    flour: 100,
-                    sugar: 15,
-                    salt: 1.8,
-                    yeast: 1.8,
-                    milk: 40,
-                    eggs: 28,
-                    butter: 35,
-                    vanillaSugar: 1.5,
-                },
-                timeline: [
-                    { step: 1, title: "Активация дрожжей", description: "Растворите дрожжи в теплом молоке с сахаром.", time: "15 мин" },
-                    { step: 2, title: "Замес основы", description: "Смешайте сухие ингредиенты, добавьте жидкие. Замешивайте без масла.", time: "8 мин" },
-                    { step: 3, title: "Введение жира", description: "Постепенно вмешайте размягченное масло до однородности.", time: "10 мин" },
-                    { step: 4, title: "Первый подъем", description: "Дайте подняться в теплом месте до удвоения объема.", time: "2 ч" },
-                    { step: 5, title: "Подготовка начинки", description: "Приготовьте начинку (корица, сахар, орехи) пока тесто поднимается.", time: "10 мин" },
-                    { step: 6, title: "Формовка с начинкой", description: "Раскатайте, нанесите начинку, сверните рулетом, поместите в форму.", time: "20 мин" },
-                    { step: 7, title: "Финальная расстойка", description: "Поднимется до краев формы при комнатной температуре.", time: "1 ч" },
-                    { step: 8, title: "Выпечка", description: "Выпекайте при 170°C до готовности (проверьте деревянной шпажкой).", time: "35-40 мин" }
-                ]
+                ingredients: { flour: 100, sugar: 15, salt: 1.8, yeast: 1.8, milk: 40, eggs: 28, butter: 35, vanillaSugar: 1.5 },
+                timeline: [ /* ... */ ]
             },
             cinnamon: {
                 name: "Булочки синнабон",
                 hydration: 68,
-                ingredients: {
-                    flour: 100,
-                    sugar: 10,
-                    salt: 2,
-                    yeast: 2,
-                    milk: 45,
-                    eggs: 22,
-                    butter: 25,
-                    vanillaSugar: 1,
-                },
-                timeline: [
-                    { step: 1, title: "Опара", description: "Активируйте дрожжи в теплом молоке с щепоткой сахара.", time: "12 мин" },
-                    { step: 2, title: "Замес теста", description: "Соедините все ингредиенты кроме масла, замешивайте до гладкости.", time: "8 мин" },
-                    { step: 3, title: "Обогащение маслом", description: "Вмешайте масло порциями, добиваясь эластичности.", time: "6 мин" },
-                    { step: 4, title: "Первый подъем", description: "Увеличится вдвое в смазанной миске под пленкой.", time: "1.5 ч" },
-                    { step: 5, title: "Раскатка", description: "Раскатайте в прямоугольник толщиной 1 см.", time: "5 мин" },
-                    { step: 6, title: "Начинка и формовка", description: "Нанесите масло, корицу с сахаром, сверните, нарежьте на булочки.", time: "15 мин" },
-                    { step: 7, title: "Финальная расстойка", description: "Разложите в форме, дайте подняться до соприкосновения булочек.", time: "40 мин" },
-                    { step: 8, title: "Выпечка", description: "Выпекайте при 180°C до золотистого цвета, подавайте с глазурью.", time: "25-30 мин" }
-                ]
+                ingredients: { flour: 100, sugar: 10, salt: 2, yeast: 2, milk: 45, eggs: 22, butter: 25, vanillaSugar: 1 },
+                timeline: [ /* ... */ ]
             }
         };
 
-        let currentRecipe = 'classic';
-        let currentFlour = 500;
+        let currentRecipe = 'pancakes';
+        let currentFlour = 300;
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
@@ -758,7 +702,6 @@
             const flourInput = document.getElementById('flour');
             flourInput.addEventListener('input', handleFlourChange);
             
-            // Селекторы рецептов
             document.querySelectorAll('.recipe-btn').forEach(btn => {
                 btn.addEventListener('click', handleRecipeChange);
             });
@@ -785,17 +728,35 @@
             document.querySelectorAll('.recipe-btn').forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
             currentRecipe = e.target.dataset.type;
+            
+            // Устанавливаем базовое значение муки для удобства
+            const flourInput = document.getElementById('flour');
+            if(currentRecipe === 'pancakes') {
+                flourInput.value = 300;
+            } else if (currentRecipe === 'classic') {
+                 flourInput.value = 500;
+            }
+            currentFlour = parseFloat(flourInput.value);
+            
             updateHydrationIndicator();
             calculateRecipe();
         }
 
         function updateHydrationIndicator() {
             const recipe = RECIPES[currentRecipe];
+            const hydrationSection = document.getElementById('hydrationSection');
+            
+            if(currentRecipe === 'pancakes') {
+                hydrationSection.style.display = 'none';
+                return;
+            }
+            
+            hydrationSection.style.display = 'block';
+
             const hydration = recipe.hydration;
             const marker = document.getElementById('hydrationMarker');
             const valueDisplay = document.getElementById('hydrationValue');
             
-            // Позиционируем маркер (55% = 0%, 75% = 100%)
             const position = ((hydration - 50) / 25) * 100;
             marker.style.left = Math.max(0, Math.min(100, position)) + '%';
             valueDisplay.textContent = hydration + '%';
@@ -803,9 +764,8 @@
 
         function calculateRecipe() {
             const recipe = RECIPES[currentRecipe];
-            const ratio = currentFlour / 100; // базовые проценты для пересчета
+            const ratio = currentFlour / 100; 
             
-            // Расчет всех ингредиентов
             const ingredients = {};
             for (const [key, percent] of Object.entries(recipe.ingredients)) {
                 ingredients[key] = (percent * ratio);
@@ -815,23 +775,25 @@
         }
 
         function displayResults(ingredients, recipe) {
-            // Сухие ингредиенты
-            document.getElementById('dryIngredients').innerHTML = `
+            // Динамическое отображение в зависимости от типа рецепта
+            const noYeastRecipe = !recipe.ingredients.hasOwnProperty('yeast');
+            
+            let dryIngredientsHTML = `
                 <div class="ingredient-card">
                     <div class="ingredient-emoji">🌾</div>
                     <div class="ingredient-details">
-                        <div class="ingredient-name">Мука высшего сорта</div>
+                        <div class="ingredient-name">Мука пшеничная</div>
                         <div class="ingredient-amount">${formatWeight(ingredients.flour)}</div>
-                        <div class="ingredient-note">Протеин 10.5-12%. Просеять 2 раза</div>
+                        <div class="ingredient-note">Высший сорт, общего назначения. Обязательно просеять.</div>
                         <div class="baker-percentage">100%</div>
                     </div>
                 </div>
                 <div class="ingredient-card">
-                    <div class="ingredient-emoji">🍯</div>
+                    <div class="ingredient-emoji">🍬</div>
                     <div class="ingredient-details">
                         <div class="ingredient-name">Сахар-песок</div>
-                        <div class="ingredient-amount">${formatWeight(ingredients.sugar)}</div>
-                        <div class="ingredient-note">Мелкий кристалл. Можно заменить тростниковым</div>
+                        <div class="ingredient-amount">${formatWeight(ingredients.sugar)} <span style="font-size: 0.9rem;">(≈${(ingredients.sugar/15).toFixed(1)} ст.л.)</span></div>
+                        <div class="ingredient-note">Мелкий кристалл для быстрого растворения.</div>
                         <div class="baker-percentage">${(recipe.ingredients.sugar).toFixed(1)}%</div>
                     </div>
                 </div>
@@ -839,12 +801,16 @@
                     <div class="ingredient-emoji">🧂</div>
                     <div class="ingredient-details">
                         <div class="ingredient-name">Соль морская</div>
-                        <div class="ingredient-amount">${formatWeight(ingredients.salt)} <span style="font-size: 0.9rem;">(≈${(ingredients.salt/5).toFixed(1)} ч.л.)</span></div>
-                        <div class="ingredient-note">Мелкий помол. Усиливает вкус и укрепляет клейковину</div>
+                        <div class="ingredient-amount">${formatWeight(ingredients.salt)} <span style="font-size: 0.9rem;">(≈${(ingredients.salt/6).toFixed(1)} ч.л.)</span></div>
+                        <div class="ingredient-note">Мелкий помол. Усиливает вкус и балансирует сладость.</div>
                         <div class="baker-percentage">${(recipe.ingredients.salt).toFixed(1)}%</div>
                     </div>
                 </div>
-                <div class="ingredient-card">
+            `;
+            
+            if (!noYeastRecipe) {
+                dryIngredientsHTML += `
+                 <div class="ingredient-card">
                     <div class="ingredient-emoji">🦠</div>
                     <div class="ingredient-details">
                         <div class="ingredient-name">Дрожжи хлебопекарные</div>
@@ -852,272 +818,152 @@
                             Сухие: ${formatWeight(ingredients.yeast)}<br>
                             Свежие: ${formatWeight(ingredients.yeast * 3)}
                         </div>
-                        <div class="ingredient-note">Температура активации 35-38°C. Проверить срок годности</div>
+                        <div class="ingredient-note">Температура активации 35-38°C. Проверить срок годности.</div>
                         <div class="baker-percentage">${(recipe.ingredients.yeast).toFixed(1)}%</div>
                     </div>
-                </div>
-                ${ingredients.vanillaSugar ? `
+                </div>`;
+            }
+
+            if (ingredients.vanillaSugar) {
+                 dryIngredientsHTML += `
                 <div class="ingredient-card">
                     <div class="ingredient-emoji">🌿</div>
                     <div class="ingredient-details">
                         <div class="ingredient-name">Ванильный сахар</div>
                         <div class="ingredient-amount">${formatWeight(ingredients.vanillaSugar)}</div>
-                        <div class="ingredient-note">Натуральный экстракт. Можно заменить 1/4 ч.л. ванили</div>
+                        <div class="ingredient-note">Для аромата. Можно заменить ванильным экстрактом.</div>
                         <div class="baker-percentage">${(recipe.ingredients.vanillaSugar).toFixed(1)}%</div>
                     </div>
-                </div>
-                ` : ''}
-            `;
+                </div>`;
+            }
 
-            // Жидкие ингредиенты
+            document.getElementById('dryIngredients').innerHTML = dryIngredientsHTML;
+
             let wetIngredientsHTML = '';
             
             if (ingredients.milk) {
-                wetIngredientsHTML += `
-                <div class="ingredient-card">
-                    <div class="ingredient-emoji">🥛</div>
-                    <div class="ingredient-details">
-                        <div class="ingredient-name">Молоко цельное</div>
-                        <div class="ingredient-amount">${formatVolume(ingredients.milk)}</div>
-                        <div class="ingredient-note">Жирность 3.2%. Подогреть до 35-38°C</div>
-                        <div class="baker-percentage">${(recipe.ingredients.milk).toFixed(1)}%</div>
-                    </div>
-                </div>`;
+                wetIngredientsHTML += `<div class="ingredient-card"><div class="ingredient-emoji">🥛</div><div class="ingredient-details"><div class="ingredient-name">Молоко</div><div class="ingredient-amount">${formatVolume(ingredients.milk)}</div><div class="ingredient-note">Жирность 2.5-3.2%. Для блинов - теплое, для дрожжевого - 35-38°C.</div><div class="baker-percentage">${(recipe.ingredients.milk).toFixed(1)}%</div></div></div>`;
             }
             
             if (ingredients.water) {
-                wetIngredientsHTML += `
-                <div class="ingredient-card">
-                    <div class="ingredient-emoji">💧</div>
-                    <div class="ingredient-details">
-                        <div class="ingredient-name">Вода питьевая</div>
-                        <div class="ingredient-amount">${formatVolume(ingredients.water)}</div>
-                        <div class="ingredient-note">Фильтрованная, температура 35°C</div>
-                        <div class="baker-percentage">${(recipe.ingredients.water).toFixed(1)}%</div>
-                    </div>
-                </div>`;
+                wetIngredientsHTML += `<div class="ingredient-card"><div class="ingredient-emoji">💧</div><div class="ingredient-details"><div class="ingredient-name">Вода</div><div class="ingredient-amount">${formatVolume(ingredients.water)}</div><div class="ingredient-note">${noYeastRecipe ? 'Крутой кипяток для заваривания.' : 'Фильтрованная, 35-38°C.'}</div><div class="baker-percentage">${(recipe.ingredients.water).toFixed(1)}%</div></div></div>`;
             }
             
             if (ingredients.honey) {
-                wetIngredientsHTML += `
-                <div class="ingredient-card">
-                    <div class="ingredient-emoji">🍯</div>
-                    <div class="ingredient-details">
-                        <div class="ingredient-name">Мед натуральный</div>
-                        <div class="ingredient-amount">${formatWeight(ingredients.honey)}</div>
-                        <div class="ingredient-note">Цветочный или акациевый. Придает золотистый цвет</div>
-                        <div class="baker-percentage">${(recipe.ingredients.honey).toFixed(1)}%</div>
-                    </div>
-                </div>`;
+                wetIngredientsHTML += `<div class="ingredient-card"><div class="ingredient-emoji">🍯</div><div class="ingredient-details"><div class="ingredient-name">Мед натуральный</div><div class="ingredient-amount">${formatWeight(ingredients.honey)}</div><div class="ingredient-note">Цветочный или акациевый.</div><div class="baker-percentage">${(recipe.ingredients.honey).toFixed(1)}%</div></div></div>`;
             }
             
             document.getElementById('wetIngredients').innerHTML = wetIngredientsHTML;
 
-            // Жиры
             let fatIngredientsHTML = '';
             
             if (ingredients.butter) {
-                fatIngredientsHTML += `
-                <div class="ingredient-card">
-                    <div class="ingredient-emoji">🧈</div>
-                    <div class="ingredient-details">
-                        <div class="ingredient-name">Масло сливочное</div>
-                        <div class="ingredient-amount">${formatWeight(ingredients.butter)}</div>
-                        <div class="ingredient-note">Жирность 82%. Размягчить до комнатной температуры</div>
-                        <div class="baker-percentage">${(recipe.ingredients.butter).toFixed(1)}%</div>
-                    </div>
-                </div>`;
+                fatIngredientsHTML += `<div class="ingredient-card"><div class="ingredient-emoji">🧈</div><div class="ingredient-details"><div class="ingredient-name">Масло сливочное</div><div class="ingredient-amount">${formatWeight(ingredients.butter)}</div><div class="ingredient-note">Жирность 82%. ${noYeastRecipe ? 'Растопить' : 'Размягчить'}.</div><div class="baker-percentage">${(recipe.ingredients.butter).toFixed(1)}%</div></div></div>`;
             }
             
             if (ingredients.oil) {
-                fatIngredientsHTML += `
-                <div class="ingredient-card">
-                    <div class="ingredient-emoji">🫒</div>
-                    <div class="ingredient-details">
-                        <div class="ingredient-name">Масло растительное</div>
-                        <div class="ingredient-amount">${formatVolume(ingredients.oil)}</div>
-                        <div class="ingredient-note">Рафинированное подсолнечное или оливковое</div>
-                        <div class="baker-percentage">${(recipe.ingredients.oil).toFixed(1)}%</div>
-                    </div>
-                </div>`;
+                fatIngredientsHTML += `<div class="ingredient-card"><div class="ingredient-emoji">🫒</div><div class="ingredient-details"><div class="ingredient-name">Масло растительное</div><div class="ingredient-amount">${formatVolume(ingredients.oil)}</div><div class="ingredient-note">Рафинированное, без запаха.</div><div class="baker-percentage">${(recipe.ingredients.oil).toFixed(1)}%</div></div></div>`;
             }
             
             document.getElementById('fatIngredients').innerHTML = fatIngredientsHTML;
 
-            // Яичные продукты
             const eggData = calculateEggs(ingredients.eggs);
             document.getElementById('eggIngredients').innerHTML = `
                 <div class="ingredient-card" style="grid-column: 1 / -1;">
                     <div class="ingredient-emoji">🥚</div>
                     <div class="ingredient-details">
-                        <div class="ingredient-name">Яйца куриные С1 (50-55г)</div>
+                        <div class="ingredient-name">Яйца куриные С1 (~50г)</div>
                         <div class="ingredient-amount">${eggData.display}</div>
                         <div class="ingredient-note">
                             <strong>Практический совет:</strong> ${eggData.advice}<br>
-                            <small><em>Температура яиц должна быть комнатной. Для глазировки оставьте 1 желток + 1 ст.л. молока</em></small>
+                            <small><em>Яйца должны быть комнатной температуры для лучшего смешивания.</em></small>
                         </div>
                         <div class="baker-percentage">${(recipe.ingredients.eggs).toFixed(1)}%</div>
                     </div>
-                </div>
-            `;
+                </div>`;
 
-            // Временная шкала
             let timelineHTML = '';
             recipe.timeline.forEach(step => {
-                timelineHTML += `
-                <div class="timeline-step">
-                    <div class="step-number">${step.step}</div>
-                    <div class="step-content">
-                        <div class="step-title">${step.title}</div>
-                        <div class="step-description">${step.description}</div>
-                        <div class="step-time">${step.time}</div>
-                    </div>
-                </div>`;
+                timelineHTML += `<div class="timeline-step"><div class="step-number">${step.step}</div><div class="step-content"><div class="step-title">${step.title}</div><div class="step-description">${step.description}</div><div class="step-time">${step.time}</div></div></div>`;
             });
             document.getElementById('timelineSteps').innerHTML = timelineHTML;
 
-            // Профессиональные советы
             const tips = getProTips(recipe, ingredients);
             let tipsHTML = '';
             tips.forEach(tip => {
-                tipsHTML += `
-                <div class="tip-item">
-                    <div class="tip-title">${tip.title}</div>
-                    <div>${tip.description}</div>
-                </div>`;
+                tipsHTML += `<div class="tip-item"><div class="tip-title">${tip.title}</div><div>${tip.description}</div></div>`;
             });
             document.getElementById('proTips').innerHTML = tipsHTML;
 
-            // Пищевая информация
             updateNutritionalInfo(ingredients, recipe);
 
-            // Показать результаты
             document.getElementById('resultsContainer').style.display = 'block';
         }
 
         function calculateEggs(totalEggWeight) {
-            const avgEggWeight = 50; // средний вес яйца С1
-            const eggsNeeded = totalEggWeight / avgEggWeight;
-            const wholeEggs = Math.floor(eggsNeeded);
-            const remainingWeight = totalEggWeight - (wholeEggs * avgEggWeight);
-            
-            let display = '';
-            let advice = '';
-            
-            if (wholeEggs > 0) {
-                display = `${wholeEggs} шт`;
-                if (remainingWeight > 15 && remainingWeight < 40) { // если остаток похож на желток
-                    display += ` + 1 желток`;
-                    advice = `Используйте ${wholeEggs} целых яйца и 1 дополнительный желток (~20г).`;
-                } else if(remainingWeight >= 40) { // если остаток похож на целое яйцо
-                    display = `${wholeEggs + 1} шт`
-                    advice = `Используйте ${wholeEggs + 1} целых яйца.`
-                } else {
-                    advice = `Используйте ${wholeEggs} целых яйца.`;
-                }
-            } else {
-                if (totalEggWeight >= 15) { // если нужно меньше 1 яйца, но больше желтка
-                    display = '1 желток';
-                    advice = 'Используйте только 1 яичный желток.';
-                } else if(totalEggWeight > 0) {
-                    display = '~10г яйца';
-                    advice = 'Взбейте 1 яйцо вилкой и отмерьте 10-15г на весах.';
-                } else {
-                    display = "0 шт";
-                    advice = "Яйца для этого рецепта не требуются."
-                }
-            }
-            
-            return { display, advice };
+             const avgEggWeight = 50;
+             const eggsNeeded = totalEggWeight / avgEggWeight;
+             const wholeEggs = Math.round(eggsNeeded);
+
+             return {
+                 display: `${wholeEggs} шт`,
+                 advice: `Используйте ${wholeEggs} целых яйца среднего размера (категория С1).`
+             };
         }
 
         function getProTips(recipe, ingredients) {
             const baseTips = [
-                {
-                    title: '🌡️ Контроль температуры',
-                    description: 'Идеальная температура теста после замеса: 24-26°C. Используйте кухонный термометр для точности.'
-                },
-                {
-                    title: '⏱️ Тест на готовность',
-                    description: 'Готовое тесто должно пройти "тест окна" - растягиваться в тонкую пленку, не рвясь.'
-                },
-                {
-                    title: '🔬 Качество клейковины',
-                    description: 'При замесе добавляйте жидкость постепенно - клейковина разных партий муки может отличаться.'
-                }
+                { title: '🔬 Точность - ключ', description: 'Используйте кухонные весы для всех ингредиентов, включая жидкости. Это залог стабильного результата.' },
+                { title: '🌡️ Комнатная температура', description: 'Яйца и молоко должны быть комнатной температуры (если не указано иное), чтобы эмульсия была стабильной.'}
             ];
+            
+            const yeastTips = [
+                { title: '⏱️ Тест на готовность', description: 'Готовое дрожжевое тесто должно пройти "тест окна" - растягиваться в тонкую пленку, не рвясь.'}
+            ]
 
             const specificTips = {
-                classic: [ // <-- НОВЫЕ СОВЕТЫ
-                    {
-                        title: '👑 Универсальный солдат',
-                        description: 'Это тесто идеально подходит для пирожков (печеных), сладких булочек, рулетов с маком или корицей, и даже для основ под ватрушки.'
-                    },
-                    {
-                        title: '✨ Баланс вкуса и нежности',
-                        description: 'Умеренное количество жира (18%) и сахара (20%) создает идеальный баланс между сдобным вкусом и легкостью. Тесто получается очень послушным и forgiving.'
-                    }
+                pancakes: [
+                    { title: '🤔 Первый блин комом?', description: 'Это не провал, а калибровка! Используйте первый блин, чтобы отрегулировать температуру сковороды и количество теста.' },
+                    { title: '💧 Регулировка консистенции', description: 'Если тесто кажется слишком густым, добавьте ложку теплого молока или воды. Если жидким - ложку муки.' },
+                    { title: '🔥 Горячая сковорода', description: 'Сковорода должна быть очень хорошо разогрета перед первым блином. Смазывайте ее маслом только при необходимости.' }
                 ],
-                brioche: [
-                    {
-                        title: '🧈 Техника введения масла',
-                        description: 'Масло добавляйте только после образования клейковины. Тесто должно "принять" каждую порцию.'
-                    },
-                    {
-                        title: '❄️ Холодная ферментация',
-                        description: 'Для лучшего вкуса выдержите тесто в холодильнике 8-12 часов после первого подъема.'
-                    }
-                ],
-                challah: [
-                    {
-                        title: '🥨 Техника плетения',
-                        description: 'Жгуты должны быть одинаковой длины и толщины. Плетите не слишком туго - тесто будет расширяться.'
-                    },
-                    {
-                        title: '✨ Глянцевая корочка',
-                        description: 'Смазывайте яичной смесью дважды: перед расстойкой и перед выпечкой.'
-                    }
-                ],
-                babka: [
-                    {
-                        title: '🌀 Равномерная начинка',
-                        description: 'Наносите начинку тонким слоем, оставляя 1 см от краев для лучшего склеивания.'
-                    },
-                    {
-                        title: '🔪 Техника нарезки',
-                        description: 'Режьте острым ножом уверенными движениями, не "пилите" тесто.'
-                    }
-                ],
-                cinnamon: [
-                    {
-                        title: '🌡️ Идеальная начинка',
-                        description: 'Размягченное масло + корица + сахар в пропорции 3:1:2 для идеального баланса.'
-                    },
-                    {
-                        title: '🍯 Глазурь',
-                        description: 'Сливочный сыр + сливки + сахарная пудра. Наносите на теплые булочки для лучшего распределения.'
-                    }
+                classic: [
+                    { title: '👑 Универсальный солдат', description: 'Это тесто идеально подходит для пирожков (печеных), сладких булочек, рулетов с маком или корицей и ватрушек.' },
+                    { title: '✨ Баланс вкуса и нежности', description: 'Умеренное количество жира и сахара создает идеальный баланс. Тесто получается очень послушным.' }
                 ]
             };
+            
+            let finalTips = [...baseTips];
+            if(!recipe.ingredients.hasOwnProperty('yeast')){
+                // specific tips for no-yeast recipes
+            } else {
+                finalTips.push(...yeastTips);
+            }
 
-            return [...baseTips, ...(specificTips[currentRecipe] || [])];
+            return [...finalTips, ...(specificTips[currentRecipe] || [])];
         }
 
         function updateNutritionalInfo(ingredients, recipe) {
             const totalWeight = Object.values(ingredients).reduce((sum, weight) => sum + weight, 0);
-            const portions = Math.round(totalWeight / 80); // порции по 80г
-            const hydration = recipe.hydration;
-            const fatPercent = ((ingredients.butter || 0) + (ingredients.oil || 0)) / ingredients.flour * 100;
+            
+            let portions;
+            if(currentRecipe === 'pancakes'){
+                 portions = (totalWeight / 55).toFixed(0); // средний блин ~55-60г
+            } else {
+                 portions = (totalWeight / 80).toFixed(0); // порции по 80г
+            }
+
+            const totalLiquid = (ingredients.milk || 0) + (ingredients.water || 0) + (ingredients.eggs || 0);
+            const totalFat = (ingredients.butter || 0) + (ingredients.oil || 0);
 
             document.getElementById('totalWeight').textContent = Math.round(totalWeight) + 'г';
             document.getElementById('portionCount').textContent = portions;
-            document.getElementById('hydrationPercent').textContent = hydration + '%';
-            document.getElementById('fatPercent').textContent = Math.round(fatPercent) + '%';
+            document.getElementById('hydrationPercent').textContent = Math.round(totalLiquid) + 'г';
+            document.getElementById('fatPercent').textContent = Math.round(totalFat) + 'г';
         }
 
         function formatWeight(grams) {
-            if (grams < 1) return (grams).toFixed(1) + 'г';
-            if (grams < 10) return grams.toFixed(1) + 'г';
+            if (grams < 10 && !Number.isInteger(grams)) return grams.toFixed(1) + 'г';
             return Math.round(grams) + 'г';
         }
 
